@@ -1,0 +1,12 @@
+{
+    "https://api.shinyapps.io": {
+        "server_url": "https://api.shinyapps.io",
+        "filename": "C:\\Users\\jlama\\clinical-dm-shiny",
+        "app_url": "https://j-lamadrid.shinyapps.io/ace_clinical_data_desk/",
+        "app_id": "17303834",
+        "app_guid": null,
+        "title": "ACE Clinical Data Desk",
+        "app_mode": "python-shiny",
+        "app_store_version": 1
+    }
+}
