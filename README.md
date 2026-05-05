@@ -1,95 +1,87 @@
-## Scripts for ACE Clinical Data Management
+# ACE Clinical Data Management Scripts
 
-### Requirements
+Clinical data processing utilities for ACE workflows, including eye-tracking merges, visit flagging, late-talker grouping, treatment-hour summaries, and MacArthur percentile population.
 
-Scripts are written for Python 3.12+.
+## Links
+
+- GitHub repository: [j-lamadrid/clinical-dm-scripts](https://github.com/j-lamadrid/clinical-dm-scripts)
+- Live app: [ACE Clinical Data Desk](https://j-lamadrid.shinyapps.io/ace_clinical_data_desk/)
+- shinyapps.io platform: [shinyapps.io](https://www.shinyapps.io/)
+- Shiny for Python docs: [shiny.posit.co/py](https://shiny.posit.co/py/)
+- shinyapps.io guide: [Getting started with shinyapps.io](https://docs.posit.co/shinyapps.io/guide/getting_started/)
+- Python deployment guide: [rsconnect-python deploy commands](https://docs.posit.co/rsconnect-python/commands/deploy/)
+
+Hosted deployment:
+- Public URL: [https://j-lamadrid.shinyapps.io/ace_clinical_data_desk/](https://j-lamadrid.shinyapps.io/ace_clinical_data_desk/)
+
+## Included Workflows
+
+- [UpdateEyeTracking.py](UpdateEyeTracking.py): merges exported eye-tracking data into a matching master sheet using the ET summary and LWR files.
+- [Flagger.py](Flagger.py): sorts form exports by subject and visit date, then assigns visit flags.
+- [Group.py](Group.py): groups late talker data into the standard diagnostic categories.
+- [AddGroup.py](AddGroup.py): applies a custom DxJ grouping rule to an already grouped workbook.
+- [TreatmentCondensed.py](TreatmentCondensed.py): totals treatment units in the condensed format.
+- [TreatmentCondensedWV.py](TreatmentCondensedWV.py): totals treatment units in the condensed WV format.
+- [TreatmentHoursFull.py](TreatmentHoursFull.py): calculates total and average treatment hours from the full treatment workbook.
+- [MacArthurPercentiles.py](MacArthurPercentiles.py): populates MacArthur percentile values into the LWR output.
+- [modules/ets.py](modules/ets.py): shared eye-tracking transformation logic used by the eye-tracking workflow.
+
+## Requirements
+
+These scripts were written for Python 3.12.
 
 Install dependencies with:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-or with Conda:
+Or with Conda:
+
 ```bash
 conda install --file requirements.txt
 ```
 
-### Project Layout
+## Local Usage
 
-The repository is now organized around the Shiny app while still keeping the original standalone workflows available:
+Run a workflow from the repository root with:
 
-```text
-app.py
-clinical_dm/
-  processing/      # core Python processing logic
-  shiny_app/       # Shiny UI and app services
-docs/images/       # README screenshots
-notebooks/         # exploratory notebooks
-sample_data/       # local sample/test files
-scripts/           # standalone tkinter launchers
-www/               # Shiny static assets
-```
-
-### Run The Shiny App
-
-Launch the unified Shiny app with:
 ```bash
-python -m shiny run --reload app.py
+python <script_name>.py
 ```
 
-The app lets users:
-- choose any supported script from one interface
-- upload the required inputs for that workflow
-- run the script without opening separate tkinter windows
-- download the most recent output directly from the app
-- save all outputs to the local `outputs/` folder
+Examples:
 
-### Run Standalone Launchers
+```bash
+python UpdateEyeTracking.py
+python Flagger.py
+python Group.py
+python AddGroup.py
+python TreatmentCondensed.py
+python TreatmentCondensedWV.py
+python TreatmentHoursFull.py
+python MacArthurPercentiles.py
+```
 
-If you still want the original desktop-style launchers, they now live in `scripts/`:
-
-- `python scripts/UpdateEyeTracking.py`
-- `python scripts/Flagger.py`
-- `python scripts/Group.py`
-- `python scripts/AddGroup.py`
-- `python scripts/TreatmentCondensed.py`
-- `python scripts/TreatmentCondensedWV.py`
-- `python scripts/TreatmentHoursFull.py`
-- `python scripts/MacArthurPercentiles.py`
+## Workflow Notes
 
 ### Eye Tracking Sheet Merger
 
-![ETS Gui](docs/images/ets_gui.PNG)
+Uses four source files:
+- exported eye-tracking data
+- matching master sheet
+- ET summary workbook
+- LWR file
 
-Takes 4 files and aggregates the data according to the selected timeline, appending the result to the running master data sheet for the given test.
-
-Steps:
-1. Run `python scripts/UpdateEyeTracking.py`
-2. Browse for desired exported data file
-3. Browse for corresponding master sheet
-4. Browse for most recent ET Summary sheet
-5. Browse for most recent LWR sheet
-6. Select the correct timeline
-7. Select the software used for the exported data
-8. Click `Run`
+The workflow aggregates the selected timeline and appends the transformed output to the running master sheet.
 
 ### Flagger
 
-![Flagger Gui](docs/images/flagger_gui.PNG)
-
-Sorts output form data by Subject ID and Visit Date, flagging each visit with the visit number.
-
-Steps:
-1. Run `python scripts/Flagger.py`
-2. Browse for desired exported data file
-3. Choose a filename without the extension
-4. Click `Run`
+Takes an exported CSV, sorts by `SubjectId` and `EvalDate`, removes duplicate subject/date rows, and assigns sequential visit numbers.
 
 ### Group
 
-![Group Gui](docs/images/group_gui.PNG)
-
-Groups the late talkers data into categorized diagnostic groups:
+Groups late talker data into these categories:
 - Always Typical
 - Transient Language Delay
 - Persistent Language Delay
@@ -97,53 +89,29 @@ Groups the late talkers data into categorized diagnostic groups:
 - LD to ASD
 - Persistent ASD
 
-Steps:
-1. Run `python scripts/Group.py`
-2. Browse for the original late talkers data sheet
-3. Choose a filename without the extension
-4. Click `Run`
-
 ### AddGroup
 
-![Add Group Gui](docs/images/addgroup_gui.PNG)
-
-Allows the user to create a new diagnostic group in grouped late talkers data.
-
-Steps:
-1. Run `python scripts/AddGroup.py`
-2. Enter the name of the new DxJ group in `New Group`
-3. Enter desired first DxJs in `Begins With` or leave blank for all allowed DxJs
-4. Enter desired last DxJs in `Ends With` or leave blank for all allowed DxJs
-5. Enter desired possible DxJs between the first and last DxJ in `Possibilities` or leave blank for all allowed DxJs
-6. Enter the minimum number of DxJs for the group in `Minimum # of DxJ`
-7. Browse for the output sheet from `Group.py`
-8. Choose a filename without the extension
-9. Click `Run`
-
-Example:
-- `ASD Transition; FMD GD LD MD Other TypSibASD; ASD; FMD GD LD MD Other ASD TypSibASD; 2`
+Adds a custom diagnostic grouping rule using:
+- group name
+- allowed starting DxJs
+- allowed ending DxJs
+- allowed middle DxJs
+- minimum number of DxJs
 
 ### Treatment Hours
 
-![Treatment Hours Gui](docs/images/txhourscons_gui.PNG)
+The treatment scripts calculate total units or hours and average weekly values, depending on the selected workflow.
 
-Calculates the total or average number of units a subject has in a given treatment.
+### MacArthur Percentiles
 
-Steps:
-1. Run `python scripts/TreatmentCondensed.py` or `python scripts/TreatmentHoursFull.py`
-2. Browse for the desired treatment hours data sheet
-3. Choose a filename without the extension
-4. Click `Run`
+Populates the LWR with the best-fitting percentile by visit and section using the scoring appendix workbook.
 
-### MacArthur Percentile Calculator
+## Repository Files
 
-![MacArthur Percentile Calculator Gui](docs/images/macarthur_gui.PNG)
+- [requirements.txt](requirements.txt): Python dependencies
+- [luminance_calculations.ipynb](luminance_calculations.ipynb): exploratory notebook
+- [test_diff_index.xlsx](test_diff_index.xlsx): sample workbook included in the repository
 
-Populates the LWR with the most appropriate percentile by visit and section based on the MacArthur Bates ranking charts.
+## Notes
 
-Steps:
-1. Run `python scripts/MacArthurPercentiles.py`
-2. Browse for the most recent LWR
-3. Browse for the scoring appendix sheet
-4. Browse for the desired output directory
-5. Click `Run`
+- The older tkinter screenshots were intentionally removed from this README so the documentation focuses on the current web/deployment-oriented workflow instead of the legacy desktop UI.
