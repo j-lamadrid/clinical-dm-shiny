@@ -23,6 +23,7 @@ from clinical_dm.shiny_app.services import (
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 ASSET_DIR = ROOT_DIR / "www"
+GROUP_DEMO_FILE = ROOT_DIR / "sample_data" / "test_diff_index.xlsx"
 
 
 def file_info(uploaded_file):
@@ -103,9 +104,10 @@ def group_form():
     return ui.div(
         ui.div(
             ui.p(
-                "Upload the late talker workbook and the standard diagnostic grouping logic will be applied.",
+                "Run the bundled demo workbook or upload a late talker workbook to apply the standard diagnostic grouping logic.",
                 class_="window-copy",
             ),
+            ui.input_checkbox("group_use_demo", "Use bundled demo workbook", value=True),
             ui.input_file("group_input", "Late Talkers Workbook (.xlsx)", accept=[".xlsx"]),
             ui.input_text("group_output_name", "Output File Name", placeholder="grouped_late_talkers"),
             class_="control-group",
@@ -260,7 +262,7 @@ app_ui = ui.page_fluid(
                                 "tool",
                                 "Available Scripts",
                                 SCRIPT_OPTIONS,
-                                selected="eye_tracking",
+                                selected="group",
                                 size="8",
                             ),
                             class_="script-select",
@@ -312,9 +314,12 @@ def server(input, output, session):
     del session
 
     run_state = reactive.value("idle")
-    run_message = reactive.value("Choose a script, load its files, and press Run Selected Script.")
+    run_message = reactive.value(
+        "The Group demo workbook is bundled with the app. Press Run Selected Script to try it."
+    )
     run_log_value = reactive.value(
-        "Ready.\n\nScript messages and processing logs will appear in this window."
+        "Ready.\n\nThe default Group workflow uses sample_data/test_diff_index.xlsx. "
+        "Script messages and processing logs will appear in this window."
     )
     output_path_value = reactive.value(None)
 
@@ -414,7 +419,14 @@ def server(input, output, session):
                 result = run_flagger(file_path=file_path, output_name=input.flagger_output_name())
 
             elif selected_tool == "group":
-                file_path, _ = file_info(input.group_input())
+                if input.group_use_demo():
+                    if not GROUP_DEMO_FILE.exists():
+                        raise FileNotFoundError(
+                            f"The bundled demo workbook is missing: {GROUP_DEMO_FILE}"
+                        )
+                    file_path = GROUP_DEMO_FILE
+                else:
+                    file_path, _ = file_info(input.group_input())
                 result = run_group(file_path=file_path, output_name=input.group_output_name())
 
             elif selected_tool == "add_group":

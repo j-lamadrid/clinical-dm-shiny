@@ -63,6 +63,10 @@ python TreatmentHoursFull.py
 python MacArthurPercentiles.py
 ```
 
+## Shiny App Demo
+
+The Shiny app opens on the Group workflow with `sample_data/test_diff_index.xlsx` selected as a bundled demo workbook. Users can press **Run Selected Script** immediately, without downloading or uploading the sample file.
+
 ## Workflow Notes
 
 ### Eye Tracking Sheet Merger
@@ -110,7 +114,7 @@ Populates the LWR with the best-fitting percentile by visit and section using th
 
 - [requirements.txt](requirements.txt): Python dependencies
 - [luminance_calculations.ipynb](luminance_calculations.ipynb): exploratory notebook
-- [test_diff_index.xlsx](test_diff_index.xlsx): sample workbook included in the repository
+- [test_diff_index.xlsx](sample_data/test_diff_index.xlsx): sample workbook included in the repository
 
 ## Notes
 
